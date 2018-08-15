@@ -1,0 +1,14 @@
+<OpencvCamera>:
+    orientation: 'vertical'
+
+    Camera:
+        id: camera
+        resolution: (500, 500)
+        play: True
+
+    ToggleButton:
+        id: button
+        text: 'Pause'
+        on_press: root.btn_clk()
+        size_hint_y: None
+        height: '48dp'
