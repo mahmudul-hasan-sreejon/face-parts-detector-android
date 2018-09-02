@@ -12,6 +12,11 @@ import imutils
 import dlib
 import cv2
 
+
+# detector = dlib.get_frontal_face_detector()
+# predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+
+
 Builder.load_file('camera.kv')
 
 class OpencvCamera(BoxLayout):
@@ -29,6 +34,9 @@ class OpencvCamera(BoxLayout):
             self.ids['camera'].play = True
 
     def update(self):
+        detector = dlib.get_frontal_face_detector()
+        predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+
         ret, image = self.capture.read()
         if ret is True:
             image = imutils.resize(image, width = 500)
@@ -55,7 +63,7 @@ class OpencvCamera(BoxLayout):
 
 class RunCamera(App):
     def build(self):
-        self.capture = cv2.VideoCapture(1)
+        self.capture = cv2.VideoCapture(0)
         self.my_camera = OpencvCamera(capture=self.capture, fps=30)
         return self.my_camera
 
