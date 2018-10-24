@@ -1,14 +1,23 @@
-<OpencvCamera>:
-    orientation: 'vertical'
+<AppHome>:
+    BoxLayout:
+        orientation: "vertical"
 
-    Camera:
-        id: camera
-        resolution: (500, 500)
-        play: True
+        KivyCamera:
+            id: app_cam
 
-    ToggleButton:
-        id: button
-        text: 'Pause'
-        on_press: root.btn_clk()
-        size_hint_y: None
-        height: '48dp'
+        BoxLayout:
+            orientation: "horizontal"
+            height: 20
+            size_hint_y: None
+
+            Button:
+                id: button_start
+                size_hint: 0.5,1
+                text: "Start"
+                on_press: root.dostart()
+
+            Button:
+                id: button_exit
+                text: "Quit"
+                size_hint: 0.5,1
+                on_press: root.doexit()

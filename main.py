@@ -1,75 +1,110 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.lang import Builder
-
+from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+from kivy.core.window import Window
+# from kivy.base import EventLoop
+# import kivy.core.text
 
+# ///////////////////////////////
 
+import cv2
 from imutils import face_utils
 import numpy as np
 import imutils
 import dlib
-import cv2
-
-
-# detector = dlib.get_frontal_face_detector()
-# predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
 
 Builder.load_file('camera.kv')
 
-class OpencvCamera(BoxLayout):
-    def __init__(self, capture, fps, **kwargs):
-        super(OpencvCamera, self).__init__(**kwargs)
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+
+class KivyCamera(Image):
+    def __init__(self, **kwargs):
+        super(KivyCamera, self).__init__(**kwargs)
+        self.capture = None
+
+    def start(self, capture, fps = 30):
         self.capture = capture
-        Clock.schedule_interval(self.update, fps)
+        Clock.schedule_interval(self.update, 1.0 / fps)
 
-    def btn_clk(self):
-        if self.ids['camera'].play == True:
-            self.ids['button'].text = "Play"
-            self.ids['camera'].play = False
-        else:
-            self.ids['button'].text = "Pause"
-            self.ids['camera'].play = True
+    def stop(self):
+        Clock.unschedule_interval(self.update)
+        self.capture = None
 
-    def update(self):
-        detector = dlib.get_frontal_face_detector()
-        predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+    def update(self, dt):
+        return_value, frame = self.capture.read()
+        if return_value:
+            texture = self.texture
+            w, h = frame.shape[1], frame.shape[0]
 
-        ret, image = self.capture.read()
-        if ret is True:
-            image = imutils.resize(image, width = 500)
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            if not texture or texture.width != w or texture.height != h:
+                self.texture = texture = Texture.create(size=(w, h))
+                texture.flip_vertical()
+
+            global detector
+            global predictor
+
+            frame = imutils.resize(frame)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             rects = detector(gray, 1)
             for (i, rect) in enumerate(rects):
                 shape = predictor(gray, rect)
                 shape = face_utils.shape_to_np(shape)
+                output = face_utils.visualize_facial_landmarks(frame, shape)
+                texture.blit_buffer(output.tobytes(), colorfmt='bgr')
 
-            output = face_utils.visualize_facial_landmarks(image, shape)
+            # texture.blit_buffer(frame.tobytes(), colorfmt='bgr')
+            self.canvas.ask_update()
 
-            # convert it to texture
-            buf1 = cv2.flip(output, 0)
-            buf = buf1.tostring()
-            image_texture = Texture.create(size = (output.shape[1], output.shape[0]), colorfmt = 'bgr')
-            image_texture.blit_buffer(buf, colorfmt = 'bgr', bufferfmt = 'ubyte')
-            # display image from the texture
-            self.texture = image_texture
+capture = None
+
+class AppHome(BoxLayout):
+    def init_home(self):
+        pass
+
+    def dostart(self, *largs):
+        if(self.ids.button_start.text == "Start"):
+            self.ids.button_start.text = "Stop"
+            global capture
+            capture = cv2.VideoCapture(0)
+            self.ids.app_cam.start(capture)
+        else:
+            self.ids.button_start.text = "Start"
+            global capture
+            if capture != None:
+                capture.release()
+                capture = None
+
+    def doexit(self):
+        global capture
+        if capture != None:
+            capture.release()
+            capture = None
+            
+        # EventLoop.close()
+
+        App.get_running_app().stop()
+        Window.close()
 
 
-            # cv2.imshow("Image", output)
-
-
-class RunCamera(App):
+class CamApp(App):
     def build(self):
-        self.capture = cv2.VideoCapture(0)
-        self.my_camera = OpencvCamera(capture=self.capture, fps=30)
-        return self.my_camera
+        Window.clearcolor = (.4,.4,.4,1)
+        Window.size = (400, 300)
+        homeWin = AppHome()
+        homeWin.init_home()
+        return homeWin
 
     def on_stop(self):
-        self.capture.release()
-
+        global capture
+        if capture != None:
+            capture.release()
+            capture = None
 
 if __name__ == '__main__':
-    RunCamera().run()
+    CamApp().run()
