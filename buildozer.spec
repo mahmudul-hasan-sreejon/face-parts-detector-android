@@ -1,7 +1,7 @@
 [app]
 
 # (str) Title of your application
-title = FaceDetector
+title = Face Detector
 
 # (str) Package name
 package.name = facedetector
@@ -36,7 +36,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,cv2
+requirements = kivy, plyer
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -52,7 +52,7 @@ requirements = kivy,cv2
 icon.filename = %(source.dir)s/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = landscape
+orientation = portrait
 
 # (list) List of service to declare
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
@@ -69,10 +69,10 @@ orientation = landscape
 #
 
 # (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
+fullscreen = 0
 
 # (list) Permissions
-#android.permissions = INTERNET
+android.permissions = CAMERA
 
 # (int) Android API to use
 #android.api = 19
