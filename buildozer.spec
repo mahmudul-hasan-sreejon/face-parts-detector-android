@@ -36,7 +36,7 @@ version = 1.0.0
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy, plyer
+requirements = kivy, plyer, numpy, imutils, dlib
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
